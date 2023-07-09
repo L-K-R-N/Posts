@@ -1,0 +1,15 @@
+.navbar {
+    height: 50px;
+    width: 98vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 0 50px;
+    background-color: lightcyan;
+}
+
+.navbar__links {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+}
