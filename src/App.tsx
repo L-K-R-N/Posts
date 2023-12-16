@@ -7,15 +7,21 @@ import { setIsAuth, setIsLoading } from "./store/reducers/AuthSlice";
 import {Error} from "./pages/Error";
 import { About } from "./pages/About";
 import { PostIdPage } from "./pages/PostIdPage";
+import { Posts } from "./pages/Posts";
+import { Login } from "./pages/Login";
 
-
-const router = (isAuth: boolean) => createBrowserRouter([
-  isAuth ?
+const authRouter = createBrowserRouter(
+ [
+ 
   {
     path: '/',
     element: <Navbar/>,
-    errorElement: <Error/>,
+    errorElement: <Posts/>,
     children: [
+      {
+        path: '',
+        element: <Posts/>
+      },
       {
         path: 'about',
         element: <About/>,
@@ -25,19 +31,19 @@ const router = (isAuth: boolean) => createBrowserRouter([
         element: <PostIdPage/>,
       },
     ]
-  } : 
-  {
-    path: '/login',
-    element: <PostIdPage/>,
-  },
-  
-  
-])
+  }]
+  )
+const unauthRouter = createBrowserRouter([ 
+    {
+      path: '/',
+      element: <Login/>,
+      errorElement: <Login/>,
+    },
+  ])
 
 export function App() {
     const dispatch = useAppDispatch();
     const {isAuth} = useAppSelector(state => state.AuthReducer)
-
     useEffect(() => {
       if (localStorage.getItem('auth')) {
         dispatch(setIsAuth(false))
@@ -47,7 +53,7 @@ export function App() {
   return (
     
 
-      <RouterProvider router={router(isAuth)}/>
+      <RouterProvider router={isAuth ? authRouter : unauthRouter}/>
 
   )
 }

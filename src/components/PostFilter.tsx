@@ -23,9 +23,10 @@ export const PostFilter: React.FC<Props> = ({filter, setFilter}) => {
         />
       
         <MySelect
+          
           title={'Сортировка'}
           value={filter.sort}
-          onChange={selectedSort => setFilter({...filter, sort: selectedSort})}
+          onChange={(selectedSort) => setFilter({...filter, sort: selectedSort === 'body' || selectedSort === 'title' ? selectedSort : 'title'})}
           defaultOption="Сортировка"
           options={[
             {value: 'title', name: 'По названию'},
