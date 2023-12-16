@@ -1,5 +1,5 @@
 
-import  {useEffect, useRef, useState} from "react";
+import  {useEffect, useState} from "react";
 import '../styles/App.css';
 import {PostList} from "../components/PostList";
 import {MyButton} from "../components/UI/button/MyButton";
@@ -7,25 +7,27 @@ import {PostForm} from "../components/PostForm";
 import {PostFilter} from "../components/PostFilter";
 import {MyModal} from "../components/UI/modal/MyModal";
 import { usePosts } from "../hooks/usePosts";
-import PostService from "../API/PostService";
 import { Loader } from "../components/UI/loader/Loader";
-import { useFetching } from "../hooks/useFetching";
 import { getTotalPages } from "../utils/pages";
 import { Pagination } from "../components/UI/pagination/Pagination";
 import { useObserver } from "../hooks/useObserver";
 import {MySelect} from "../components/UI/select/MySelect";
 import { IPost } from "../models/IPost";
-
+import { useGetAllPostsQuery } from "../services/PostApi";
+import {useRef} from 'react'
+import { IFilter } from "../models/IFilter";
 
 
 
 export const Posts = () => {
-
+  const [limit, setLimit] = useState('10')
+  const [page, setPage] = useState(1)
   const [posts, setPosts] = useState<IPost[]>([])
-  const [filter, setFilter] = useState({sort: '', query: ''})
+  const [filter, setFilter] = useState<IFilter>({sort: 'title', query: ''});
+  const {data: postsData, isLoading, isError, error} = useGetAllPostsQuery({limit: Number(limit), page})
   const removePost = (post: IPost) => setPosts(posts.filter(p => p.id !== post.id))
-  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
-  
+  const sortedAndSearchedPosts = usePosts(posts || postsData, filter.sort, filter.query)
+  const lastElement = useRef<HTMLDivElement | null>(null)
   const createPost = (newPost: IPost) => {
     setPosts([...posts, newPost])
     setModal(false)
@@ -34,17 +36,8 @@ export const Posts = () => {
   const [modal, setModal] = useState(false)
 
   const [totalPages, setTotalPages] = useState(0)
-  const [limit, setLimit] = useState(10)
-  const [page, setPage] = useState(1)
-  const lastElement = useRef()
   
-
-  const [isPostsLoading, fetchPosts, postsError] = useFetching(async (limit: number, page: number) => {
-    const response = await PostService.getAll(limit, page)
-    setPosts([...posts, ...response.data])
-    const totalCount = response.headers['x-total-count'];
-    setTotalPages(getTotalPages(totalCount, limit))
-  })
+  
 
   const changePage = (page: number) => {
     setPage(page)
@@ -52,18 +45,22 @@ export const Posts = () => {
 
 
 
-  useObserver(lastElement, isPostsLoading, page < totalPages, () => {
-    setPage(page + 1)  
-  })
+  useObserver(lastElement)
 
 
   useEffect(() => {
-    fetchPosts(limit, page)
-  }, [page, limit])
+    if (postsData) {
+      setPosts([...posts, ...postsData])
+    }
+    
+    const totalCount = posts.length;
+    setTotalPages(getTotalPages(totalCount, Number(limit)))
+
+  }, [page, limit, postsData])
 
   return (
       <div className="posts">
-        <MyButton style={{marginTop: '10px'}} onClick={() => setModal(true)}>Добавить пост</MyButton>
+        <MyButton onClick={() => setModal(true)}>Добавить пост</MyButton>
         <hr style={{margin: '10px 0'}}/>
         <MyModal children={<PostForm create={createPost}/>} visible={modal} setVisible={setModal}/>
         <PostFilter filter={filter} setFilter={setFilter}/>
@@ -78,10 +75,10 @@ export const Posts = () => {
               {value: 25, name: '25'},
               {value: -1, name: 'Показать все'}
             ]}/>
-        {postsError &&
-          <h3 style={{textAlign: 'center'}}>Произошла ошибка {postsError}</h3> 
+        {isError &&
+          <h3 style={{textAlign: 'center'}}>Произошла ошибка {("message" in error) ? error.message : ''}</h3> 
         }
-        {isPostsLoading && 
+        {isLoading && 
           <div style={{display: 'flex', justifyContent: 'center', marginTop: 50}}><Loader/></div> 
         }
         <PostList remove={removePost} posts={sortedAndSearchedPosts} title="JS"/>

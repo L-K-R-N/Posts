@@ -2,6 +2,7 @@ import { useMemo } from "react"
 
 
 export const usePagination = (totalPages: number) => {
+
     const getPagesArray = useMemo(() => {
         let pagesArray = [];
         for (let i = 0; i < totalPages; i++) {

@@ -30,7 +30,7 @@ export const PostItem: React.FC<Props> = ({post, remove}) => {
                 </div>
             </div>
             <div className={cl.post__btns}>
-                <MyButton onClick={() => navigate(`./${post.id}`)}>Открыть</MyButton>
+                <MyButton onClick={() => navigate(`posts/${post.id}`)}>Открыть</MyButton>
                 <MyButton onClick={() => remove(post)}>Удалить</MyButton>
             </div>
       </div>

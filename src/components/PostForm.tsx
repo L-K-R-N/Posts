@@ -35,7 +35,7 @@ export const PostForm: React.FC<Props> = ({create}) => {
 
           type="text" 
           placeholder="Описание"/>
-          <MyButton onClick={(e) => addNewPost(e)} >Создать пост</MyButton>
+          <MyButton onClick={(e) => addNewPost(e)}>Создать пост</MyButton>
         </form>
     )
 }
